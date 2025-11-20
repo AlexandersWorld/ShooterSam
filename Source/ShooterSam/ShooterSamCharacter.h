@@ -82,7 +82,6 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-
 public:
 
 	/** Handles move inputs from either controls or UI interfaces */
@@ -112,6 +111,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<AGun>> GunClasses;
 
+	UPROPERTY(EditAnywhere)
+	float MaxHealth = 100.0f;
+
+	float Health;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsAlive = true;
+
 	AGun* CurrentGun;
 
 	void Shoot();
@@ -122,5 +129,8 @@ public:
 	void EquipWeapon(AGun* Gun);
 
 	int32 CurrentWeaponIndex = 0;
+
+	UFUNCTION()
+	void OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 };
 

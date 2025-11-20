@@ -54,6 +54,10 @@ void AShooterSamCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Health = MaxHealth;
+
+	OnTakeAnyDamage.AddDynamic(this, &AShooterSamCharacter::OnDamageTaken);
+
 	if (GunClasses.Num() == 0) return;
 
 	GetMesh()->HideBoneByName("weapon_r", EPhysBodyOp::PBO_None);
@@ -148,6 +152,21 @@ void AShooterSamCharacter::EquipWeapon(AGun* Gun)
 			TEXT("WeaponSocket")
 		);
 		Gun->SetOwnerController(GetController());
+	}
+}
+
+void AShooterSamCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (IsAlive)
+	{
+		Health -= Damage;
+		if (Health <= 0.0f)
+		{
+			IsAlive = false;
+			Health = 0;
+
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 	}
 }
 
