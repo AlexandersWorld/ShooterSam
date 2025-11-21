@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "ShooterSamPlayerController.h"
 #include "ShooterSam.h"
 
 AShooterSamCharacter::AShooterSamCharacter()
@@ -55,6 +56,8 @@ void AShooterSamCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	Health = MaxHealth;
+
+	UpdateHUD();
 
 	OnTakeAnyDamage.AddDynamic(this, &AShooterSamCharacter::OnDamageTaken);
 
@@ -155,17 +158,36 @@ void AShooterSamCharacter::EquipWeapon(AGun* Gun)
 	}
 }
 
+void AShooterSamCharacter::UpdateHUD()
+{
+	AShooterSamPlayerController* PlayerController = Cast<AShooterSamPlayerController>(GetController());
+	if (PlayerController)
+	{
+		float NewPercent = Health / MaxHealth;
+
+		if (NewPercent < 0.0f)
+		{
+			NewPercent = 0.0f;
+		}
+
+		PlayerController->HUDWidget->SetHealthBarPercent(Health / MaxHealth);
+	}
+}
+
 void AShooterSamCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (IsAlive)
 	{
 		Health -= Damage;
+
+		UpdateHUD();
+
 		if (Health <= 0.0f)
 		{
 			IsAlive = false;
 			Health = 0;
-
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			DetachFromControllerPendingDestroy();
 		}
 	}
 }
